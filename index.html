@@ -215,8 +215,14 @@ section{position:relative}
 .sig__head h2{font-family:'Cormorant Garamond',serif;font-size:clamp(38px,6vw,82px);line-height:1;letter-spacing:.02em}
 .sig__head p{font-family:'Shippori Mincho',serif;font-size:14px;line-height:2;letter-spacing:.1em;color:rgba(244,237,224,.7);max-width:40ch}
 .sig__track-wrap{overflow:hidden}
-.sig__track{display:flex;gap:clamp(20px,3vw,40px);padding:10px clamp(20px,4vw,60px) 80px;will-change:transform}
-.card{position:relative;flex:0 0 auto;width:clamp(280px,32vw,420px);aspect-ratio:780/1000;height:auto;border:1px solid var(--line);overflow:hidden;background:#0a0706;display:flex;flex-direction:column;justify-content:flex-end;padding:34px}
+.sig__track{display:flex;align-items:center;gap:clamp(24px,3.4vw,48px);padding:48px clamp(20px,4vw,60px) 90px;will-change:transform}
+@media(max-width:760px){
+  .sig{padding:104px 0 8px}
+  .sig__head{margin-bottom:24px}
+  .sig__head p{display:none}
+  .sig__track{padding:30px 20px 56px}
+}
+.card{position:relative;flex:0 0 auto;width:clamp(300px,35vw,460px);aspect-ratio:780/1000;height:auto;border:1px solid var(--line);overflow:hidden;background:#0a0706;display:flex;flex-direction:column;justify-content:flex-end;padding:34px;will-change:transform,filter}
 /* real cocktail photo (swap-ready: replace the src file in /images) */
 .card__photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform 1.2s var(--ease)}
 .card:hover .card__photo{transform:scale(1.03)}
@@ -943,13 +949,29 @@ window.addEventListener('load',()=>{
     if(cue) tl.to(cue,{opacity:0,duration:.1},.05);
   })();
 
-  /* ---- SIGNATURE horizontal scroll ---- */
+  /* ---- SIGNATURE horizontal scroll + center-focus scaling ---- */
   const track = document.querySelector('.sig__track');
   if(track){
+    const sigCards = gsap.utils.toArray('.sig__track .card');
+    // the card nearest the viewport centre grows (~1.12x), the others recede and dim
+    const updateFocus = ()=>{
+      const cx = window.innerWidth/2;
+      sigCards.forEach(c=>{
+        const r = c.getBoundingClientRect();
+        const d = Math.min(1, Math.abs((r.left + r.width/2) - cx) / (window.innerWidth*.55));
+        gsap.set(c,{
+          scale: 1.12 - .2*d,
+          filter: 'brightness('+(1 - .26*d).toFixed(3)+')',
+          zIndex: d < .25 ? 2 : 1
+        });
+      });
+    };
     const dist = ()=> track.scrollWidth - window.innerWidth + 80;
-    gsap.to(track,{ x:()=>-dist(), ease:'none',
-      scrollTrigger:{ trigger:'.sig', start:'top top', end:()=>'+='+dist(), scrub:1, pin:true, invalidateOnRefresh:true }
+    gsap.to(track,{ x:()=>-dist(), ease:'none', onUpdate:updateFocus,
+      scrollTrigger:{ trigger:'.sig', start:'top top', end:()=>'+='+dist(), scrub:1, pin:true, invalidateOnRefresh:true, onRefresh:updateFocus }
     });
+    updateFocus();
+    window.addEventListener('resize', updateFocus);
   }
 
   /* ---- GALLERY parallax ---- */
