@@ -565,7 +565,7 @@ footer{padding:60px 0 50px;background:#050403;border-top:1px solid var(--line)}
       </article>
     </div>
   </div>
-  <div class="sig__foot" data-ja="— ドラッグ／スクロールで巡る" data-en="— Drag or scroll to explore">— ドラッグ／スクロールで巡る</div>
+  <div class="sig__foot" data-ja="— ドラッグ／スクロールで巡る・タップで拡大" data-en="— Drag or scroll to explore, tap a glass to zoom">— ドラッグ／スクロールで巡る・タップで拡大</div>
 </section>
 
 <!-- GALLERY -->
@@ -957,14 +957,21 @@ window.addEventListener('load',()=>{
     if(cue) tl.to(cue,{opacity:0,duration:.1},.05);
   })();
 
-  /* ---- SIGNATURE horizontal scroll + center-focus scaling ---- */
+  /* ---- SIGNATURE horizontal scroll + center-focus scaling + click-to-zoom ---- */
   const track = document.querySelector('.sig__track');
   if(track){
     const sigCards = gsap.utils.toArray('.sig__track .card');
-    // the card nearest the viewport centre grows (~1.12x), the others recede and dim
+    let expandedCard = null;
+    // the card nearest the viewport centre grows (~1.12x), the others recede and dim.
+    // while a card is click-expanded, that card wins regardless of scroll position.
     const updateFocus = ()=>{
       const cx = window.innerWidth/2;
       sigCards.forEach(c=>{
+        if(expandedCard){
+          const isExp = c===expandedCard;
+          gsap.set(c,{ scale:isExp?1.3:0.86, filter:'brightness('+(isExp?1:0.5)+')', zIndex:isExp?6:1 });
+          return;
+        }
         const r = c.getBoundingClientRect();
         const d = Math.min(1, Math.abs((r.left + r.width/2) - cx) / (window.innerWidth*.55));
         gsap.set(c,{
@@ -980,6 +987,25 @@ window.addEventListener('load',()=>{
     });
     updateFocus();
     window.addEventListener('resize', updateFocus);
+
+    // ---- click a card to zoom it in place; click again / click background / Esc to close ----
+    const onKeyClose = e=>{ if(e.key==='Escape') collapseCard(); };
+    function collapseCard(){
+      if(!expandedCard) return;
+      expandedCard = null;
+      document.removeEventListener('keydown', onKeyClose);
+      updateFocus();
+    }
+    function expandCard(c){
+      if(expandedCard === c){ collapseCard(); return; }
+      expandedCard = c;
+      document.addEventListener('keydown', onKeyClose);
+      updateFocus();
+    }
+    sigCards.forEach(c=> c.addEventListener('click', ()=>expandCard(c)));
+    document.querySelector('.sig__track-wrap').addEventListener('click', e=>{
+      if(!e.target.closest('.card')) collapseCard();
+    });
   }
 
   /* ---- GALLERY parallax ---- */
