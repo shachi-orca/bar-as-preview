@@ -215,12 +215,15 @@ section{position:relative}
 .sig__head h2{font-family:'Cormorant Garamond',serif;font-size:clamp(38px,6vw,82px);line-height:1;letter-spacing:.02em}
 .sig__head p{font-family:'Shippori Mincho',serif;font-size:14px;line-height:2;letter-spacing:.1em;color:rgba(244,237,224,.7);max-width:40ch}
 .sig__track-wrap{overflow:hidden}
-.sig__track{display:flex;align-items:center;gap:clamp(24px,3.4vw,48px);padding:48px clamp(20px,4vw,60px) 90px;will-change:transform}
+/* 左右の余白は「中央フォーカスで1.12倍まで拡大される演出」の最大はみ出し量
+   （カード幅の6% = 460px時27.6px, 300px時18px）を必ず上回る値にする。
+   これより狭いと .sig__track-wrap の overflow:hidden で拡大時に端が切れる。 */
+.sig__track{display:flex;align-items:center;gap:clamp(24px,3.4vw,48px);padding:48px clamp(36px,4vw,70px) 90px;will-change:transform}
 @media(max-width:760px){
   .sig{padding:104px 0 8px}
   .sig__head{margin-bottom:24px}
   .sig__head p{display:none}
-  .sig__track{padding:30px 20px 56px}
+  .sig__track{padding:30px 32px 56px}
 }
 .card{position:relative;flex:0 0 auto;width:clamp(300px,35vw,460px);aspect-ratio:780/1000;height:auto;border:1px solid var(--line);overflow:hidden;background:#0a0706;display:flex;flex-direction:column;justify-content:flex-end;padding:34px;will-change:transform,filter}
 /* real cocktail photo (swap-ready: replace the src file in /images) */
