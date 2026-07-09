@@ -962,7 +962,8 @@ window.addEventListener('load',()=>{
   if(track){
     const sigCards = gsap.utils.toArray('.sig__track .card');
     let expandedCard = null;
-    // the card nearest the viewport centre grows (~1.12x), the others recede and dim.
+    // the card nearest the viewport centre grows (~1.22x), the others recede and dim.
+    // 1.22 stays under the 1.3x click-zoom scale already verified to fit every viewport height.
     // while a card is click-expanded, that card wins regardless of scroll position.
     const updateFocus = ()=>{
       const cx = window.innerWidth/2;
@@ -975,8 +976,8 @@ window.addEventListener('load',()=>{
         const r = c.getBoundingClientRect();
         const d = Math.min(1, Math.abs((r.left + r.width/2) - cx) / (window.innerWidth*.55));
         gsap.set(c,{
-          scale: 1.12 - .2*d,
-          filter: 'brightness('+(1 - .26*d).toFixed(3)+')',
+          scale: 1.22 - .36*d,
+          filter: 'brightness('+(1 - .34*d).toFixed(3)+')',
           zIndex: d < .25 ? 2 : 1
         });
       });
